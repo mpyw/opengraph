@@ -9,7 +9,7 @@ class TestPublishObject extends ObjectBase
 {
     const KEY = "og:title";
 
-    private $value;
+    protected $value;
 
     public function __construct($value)
     {

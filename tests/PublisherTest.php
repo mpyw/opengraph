@@ -10,7 +10,7 @@ class PublisherTest extends \PHPUnit_Framework_TestCase
     /**
      * @var Publisher
      */
-    private $publisher;
+    protected $publisher;
 
     protected function setUp()
     {

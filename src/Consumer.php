@@ -13,7 +13,7 @@ use Symfony\Component\DomCrawler\Crawler;
  */
 class Consumer
 {
-    private $client;
+    protected $client;
 
     /**
      * When enabled, crawler will read content of title and meta description if no
