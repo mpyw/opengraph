@@ -10,7 +10,7 @@ namespace Mpyw\OpenGraph\Objects;
  */
 class Website extends ObjectBase
 {
-    const TYPE = "website";
+    const TYPE = 'website';
 
     public function __construct()
     {

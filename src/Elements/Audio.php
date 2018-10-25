@@ -31,7 +31,7 @@ class Audio extends ElementBase
     public $type;
 
     /**
-     * @param   string      $url            URL to the audio file.
+     * @param string $url URL to the audio file.
      */
     public function __construct($url)
     {
@@ -43,7 +43,7 @@ class Audio extends ElementBase
     /**
      * Gets all properties set on this element.
      *
-     * @return  array|Property[]
+     * @return array|Property[]
      */
     public function getProperties()
     {

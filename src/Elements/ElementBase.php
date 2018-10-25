@@ -14,7 +14,7 @@ abstract class ElementBase
     /**
      * Gets all properties set on this element.
      *
-     * @return  array|Property[]
+     * @return array|Property[]
      */
     abstract public function getProperties();
 }

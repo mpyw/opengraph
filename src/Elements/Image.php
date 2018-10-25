@@ -52,7 +52,7 @@ class Image extends ElementBase
     public $userGenerated;
 
     /**
-     * @param   string      $url            URL to the image file.
+     * @param string $url URL to the image file.
      */
     public function __construct($url)
     {
@@ -64,7 +64,7 @@ class Image extends ElementBase
     /**
      * Gets all properties set on this element.
      *
-     * @return  array|Property[]
+     * @return array|Property[]
      */
     public function getProperties()
     {

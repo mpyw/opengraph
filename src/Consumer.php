@@ -2,9 +2,10 @@
 
 namespace Mpyw\OpenGraph;
 
+use DOMElement;
+use GuzzleHttp\Client;
 use Mpyw\OpenGraph\Objects\ObjectBase;
 use Mpyw\OpenGraph\Objects\Website;
-use GuzzleHttp\Client;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
@@ -12,8 +13,6 @@ use Symfony\Component\DomCrawler\Crawler;
  */
 class Consumer
 {
-    protected $client;
-
     /**
      * When enabled, crawler will read content of title and meta description if no
      * Open Graph data is provided by target page.
@@ -31,135 +30,147 @@ class Consumer
     public $debug = false;
 
     /**
-     * @param Client $client
-     */
-    public function __construct(?Client $client = null)
-    {
-        $this->client = $client ?? new Client();
-    }
-
-    /**
      * Fetches HTML content from the given URL and then crawls it for Open Graph data.
      *
-     * @param   string  $url            URL to be crawled.
-     *
-     * @return  Website
+     * @param  string     $url URL to be crawled.
+     * @return ObjectBase
      */
-    public function loadUrl($url)
+    public function loadUrl(string $url): ObjectBase
     {
         // Fetch HTTP content using Guzzle
-        $response = $this->client->get($url);
-
-        return $this->loadHtml($response->getBody()->__toString(), $url);
+        $response = (new Client())->get($url);
+        return $this->loadHtml((string)$response->getBody(), $url);
     }
 
     /**
-     * Crawls the given HTML string for OpenGraph data.
-     *
-     * @param   string  $html           HTML string, usually whole content of crawled web resource.
-     * @param   string  $fallbackUrl    URL to use when fallback mode is enabled.
-     *
-     * @return  ObjectBase
+     * @param  string      $html        HTML string, usually whole content of crawled web resource.
+     * @param  null|string $fallbackUrl URL to use when fallback mode is enabled.
+     * @return ObjectBase
      */
-    public function loadHtml($html, $fallbackUrl = null)
+    public function loadHtml(string $html, ?string $fallbackUrl = null): ObjectBase
     {
-        // Extract all data that can be found
-        $page = $this->extractOpenGraphData($html);
+        $crawler = $this->newCrawler($html);
 
-        // Use the user's URL as fallback
-        if ($this->useFallbackMode && $page->url === null) {
-            $page->url = $fallbackUrl;
-        }
+        $properties = $this->newProperties($crawler);
 
-        // Return result
-        return $page;
-    }
+        $object = $this
+            ->newObject($crawler)
+            ->assignProperties($properties, $this->debug);
 
-    private function extractOpenGraphData($content)
-    {
-        $crawler = new Crawler;
-        $crawler->addHTMLContent($content, 'UTF-8');
-
-        $properties = [];
-        foreach (['name', 'property'] as $t) {
-            // Get all meta-tags starting with "og:"
-            $props = array_map(
-                function (\DOMElement $tag) use ($t) {
-                    $name = strtolower(trim($tag->getAttribute($t)));
-                    $value = trim($tag->getAttribute("content"));
-                    return new Property($name, $value);
-                },
-                iterator_to_array($crawler->filter("meta[{$t}^='og:']"), false)
-            );
-            $properties = array_merge($properties, $props);
-        }
-            
-        // Create new object of the correct type
-        $typeProperty = current(array_filter($properties, function (Property $property) {
-            return $property->key === Property::TYPE;
-        })) ?: null;
-
-        switch ($typeProperty !== null ? $typeProperty->value : null) {
-            default:
-                $object = new Website();
-                break;
-        }
-
-        // Assign all properties to the object
-        $object->assignProperties($properties, $this->debug);
-
-        // Fallback for url
-        if ($this->useFallbackMode && !$object->url) {
-            $urlElement = $crawler->filter("link[rel='canonical']")->first();
-            if ($urlElement->count()) {
-                $object->url = trim($urlElement->attr("href"));
-            }
-        }
-
-        // Fallback for title
-        if ($this->useFallbackMode && !$object->title) {
-            $titleElement = $crawler->filter("title")->first();
-            if ($titleElement->count()) {
-                $object->title = trim($titleElement->text());
-            }
-
-            if (!$object->title) {
-                $titleElement = $crawler->filter("h1")->first();
-                if ($titleElement->count()) {
-                    $object->title = trim($titleElement->text());
-                }
-            }
-
-            if (!$object->title) {
-                $titleElement = $crawler->filter("h2")->first();
-                if ($titleElement->count()) {
-                    $object->title = trim($titleElement->text());
-                }
-            }
-        }
-
-        // Fallback for description
-        if ($this->useFallbackMode && !$object->description) {
-            $descriptionElement = $crawler->filter("meta[property='description']")->first();
-            if ($descriptionElement->count()) {
-                $object->description = trim($descriptionElement->attr("content"));
-            }
-
-            if (!$object->description) {
-                $descriptionElement = $crawler->filter("meta[name='description']")->first();
-                if ($descriptionElement->count()) {
-                    $object->description = trim($descriptionElement->attr("content"));
-                }
-            }
-
-            if (!$object->description) {
-                $descriptionElement = $crawler->filter("p")->first();
-                if ($descriptionElement->count()) {
-                    $object->description = trim($descriptionElement->text());
-                }
-            }
+        if ($this->useFallbackMode) {
+            $this->fallback($object, $crawler, $fallbackUrl);
         }
 
         return $object;
+    }
+
+    /**
+     * @param  Crawler    $crawler
+     * @return Property[]
+     */
+    protected function newProperties(Crawler $crawler): array
+    {
+        return array_map(
+            [$this, 'newProperty'],
+            iterator_to_array($crawler->filterXPath('//meta[starts-with(@property, "og:") or starts-with(@name, "og:")]'), false)
+        );
+    }
+
+    /**
+     * @param  string  $content
+     * @return Crawler
+     */
+    protected function newCrawler(string $content): Crawler
+    {
+        $crawler = new Crawler();
+        $crawler->addHTMLContent($content);
+        return $crawler;
+    }
+
+    /**
+     * @param  DOMElement $tag
+     * @return Property
+     */
+    protected function newProperty(DOMElement $tag): Property
+    {
+        $name = trim($tag->getAttribute('name') ?: $tag->getAttribute('property'));
+        $value = trim($tag->getAttribute('content'));
+        return new Property($name, $value);
+    }
+
+    /**
+     * @param  Crawler    $crawler
+     * @return ObjectBase
+     */
+    protected function newObject(Crawler $crawler): ObjectBase
+    {
+        switch ($crawler->evaluate('normalize-space(//meta[@property="og:type" or @name="og:type"]/@content)')[0] ?? null) {
+            default:
+                return new Website();
+        }
+    }
+
+    /**
+     * @param  ObjectBase  $object
+     * @param  Crawler     $crawler
+     * @param  null|string $fallbackUrl
+     * @return static
+     */
+    protected function fallback(ObjectBase $object, Crawler $crawler, ?string $fallbackUrl = null): self
+    {
+        return $this
+            ->fallbackForUrl($object, $crawler, $fallbackUrl)
+            ->fallbackForTitle($object, $crawler)
+            ->fallbackForDescription($object, $crawler);
+    }
+
+    /**
+     * @param  ObjectBase  $object
+     * @param  Crawler     $crawler
+     * @param  null|string $fallbackUrl
+     * @return static
+     */
+    protected function fallbackForUrl(ObjectBase $object, Crawler $crawler, ?string $fallbackUrl = null): self
+    {
+        $object->url = $object->url
+            ?: $crawler->evaluate('normalize-space(//link[@rel="canonical"]/@href)')[0]
+            ?? null
+            ?: $fallbackUrl
+            ?: $object->url;
+
+        return $this;
+    }
+
+    /**
+     * @param  ObjectBase $object
+     * @param  Crawler    $crawler
+     * @return static
+     */
+    protected function fallbackForTitle(ObjectBase $object, Crawler $crawler): self
+    {
+        $object->title = $object->title
+            ?: $crawler->evaluate('normalize-space(//title)')[0]
+            ?? $crawler->evaluate('normalize-space(//h1)')[0]
+            ?? $crawler->evaluate('normalize-space(//h2)')[0]
+            ?? null
+            ?: $object->title;
+
+        return $this;
+    }
+
+    /**
+     * @param  ObjectBase $object
+     * @param  Crawler    $crawler
+     * @return static
+     */
+    protected function fallbackForDescription(ObjectBase $object, Crawler $crawler): self
+    {
+        $object->description = $object->description
+            ?: $crawler->evaluate('normalize-space(//meta[@property="description" or @name="description"]/@content)')[0]
+            ?? $crawler->evaluate('normalize-space(//p)')[0]
+            ?? null
+            ?: $object->description;
+
+        return $this;
     }
 }

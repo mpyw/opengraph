@@ -2,7 +2,6 @@
 
 namespace Mpyw\OpenGraph\Objects;
 
-use Fusonic\Linq\Linq;
 use Mpyw\OpenGraph\Elements\Audio;
 use Mpyw\OpenGraph\Elements\Image;
 use Mpyw\OpenGraph\Elements\Video;
@@ -16,14 +15,14 @@ abstract class ObjectBase
     /**
      * An array of audio resources attached to the object.
      *
-     * @var array|Audio[]
+     * @var Audio[]
      */
     public $audios = [];
 
     /**
      * A short description of the object.
      *
-     * @var string
+     * @var null|string
      */
     public $description;
 
@@ -32,33 +31,33 @@ abstract class ObjectBase
      * ' "" ', or 'auto'. If 'auto' is chosen, the consumer of the object will chose between 'a' or 'an'. The default is
      * the blank, "".
      *
-     * @var string
+     * @var null|string
      */
     public $determiner;
 
     /**
      * An array of images attached to the object.
      *
-     * @var array|Image[]
+     * @var Image[]
      */
     public $images = [];
 
     /**
      * The locale that the object's tags are marked up in, in the format language_TERRITORY.
      *
-     * @var string
+     * @var null|string
      */
     public $locale;
 
     /**
      * An array of alternate locales in which the resource is available.
      *
-     * @var array|string[]
+     * @var string[]
      */
     public $localeAlternate = [];
 
     /**
-     * @var bool
+     * @var null|bool
      */
     public $richAttachment;
 
@@ -72,45 +71,48 @@ abstract class ObjectBase
     /**
      * The name of the web site upon which the object resides.
      *
-     * @var string
+     * @var null|string
      */
     public $siteName;
 
     /**
      * The title of the object as it should appear in the graph.
      *
-     * @var string
+     * @var null|string
      */
     public $title;
 
     /**
      * The type of the object, such as 'article'.
      *
-     * @var string
+     * @var null|string
      */
     public $type;
 
     /**
      * The time when the object was last updated.
      *
-     * @var \DateTime
+     * @var null|\DateTimeImmutable
      */
     public $updatedTime;
 
     /**
      * The canonical URL of the object, used as its ID in the graph.
      *
-     * @var string
+     * @var null|string
      */
     public $url;
 
     /**
      * An array of videos attached to the object.
      *
-     * @var array|Video[]
+     * @var Video[]
      */
     public $videos = [];
 
+    /**
+     * ObjectBase constructor.
+     */
     public function __construct()
     {
     }
@@ -118,12 +120,13 @@ abstract class ObjectBase
     /**
      * Assigns all properties given to the this Object instance.
      *
-     * @param   array|Property[]    $properties     Array of all properties to assign.
-     * @param   bool                $debug          Throw exceptions when parsing or not.
+     * @param array|Property[] $properties Array of all properties to assign.
+     * @param bool             $debug      Throw exceptions when parsing or not.
      *
-     * @throws  \UnexpectedValueException
+     * @throws \UnexpectedValueException
+     * @return ObjectBase
      */
-    public function assignProperties(array $properties, $debug = false)
+    public function assignProperties(array $properties, $debug = false): self
     {
         foreach ($properties as $property) {
             $name = $property->key;
@@ -231,6 +234,8 @@ abstract class ObjectBase
                     }
             }
         }
+
+        return $this;
     }
 
     private function handleImageAttribute(Image $element, $name, $value)
@@ -292,8 +297,8 @@ abstract class ObjectBase
     protected function convertToBoolean($value)
     {
         switch (strtolower($value)) {
-            case "1":
-            case "true":
+            case '1':
+            case 'true':
                 return true;
             default:
                 return false;
@@ -303,7 +308,7 @@ abstract class ObjectBase
     /**
      * Gets all properties set on this object.
      *
-     * @return  array|Property[]
+     * @return array|Property[]
      */
     public function getProperties()
     {
@@ -312,7 +317,7 @@ abstract class ObjectBase
         foreach ($this->audios as $audio) {
             $properties = array_merge($properties, $audio->getProperties());
         }
-        
+
         if ($this->title !== null) {
             $properties[] = new Property(Property::TITLE, $this->title);
         }
@@ -354,7 +359,7 @@ abstract class ObjectBase
         }
 
         if ($this->updatedTime !== null) {
-            $properties[] = new Property(Property::UPDATED_TIME, $this->updatedTime->format("c"));
+            $properties[] = new Property(Property::UPDATED_TIME, $this->updatedTime->format('c'));
         }
 
         if ($this->url !== null) {

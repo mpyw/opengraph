@@ -45,7 +45,7 @@ class Video extends ElementBase
     public $height;
 
     /**
-     * @param   string      $url            URL to the video.
+     * @param string $url URL to the video.
      */
     public function __construct($url)
     {
@@ -57,7 +57,7 @@ class Video extends ElementBase
     /**
      * Gets all properties set on this element.
      *
-     * @return  array|Property[]
+     * @return array|Property[]
      */
     public function getProperties()
     {

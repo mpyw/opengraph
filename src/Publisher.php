@@ -26,18 +26,19 @@ class Publisher
 
     public function generateHtml(ObjectBase $object)
     {
-        $html = "";
-        $format = "<meta property=\"%s\" content=\"%s\"" . ($this->doctype == self::DOCTYPE_XHTML ? " />" : ">");
+        $html = '';
+        $format = '<meta property="%s" content="%s"' . ($this->doctype == self::DOCTYPE_XHTML ? ' />' : '>');
 
         foreach ($object->getProperties() as $property) {
-            if ($html !== "") {
+            if ($html !== '') {
                 $html .= "\n";
             }
 
             if ($property->value === null) {
                 continue;
-            } elseif ($property->value instanceof \DateTime) {
-                $value = $property->value->format("c");
+            }
+            if ($property->value instanceof \DateTime) {
+                $value = $property->value->format('c');
             } elseif (is_object($property->value)) {
                 throw new \UnexpectedValueException(
                     sprintf(
@@ -47,9 +48,9 @@ class Publisher
                     )
                 );
             } elseif ($property->value === true) {
-                $value = "1";
+                $value = '1';
             } elseif ($property->value === false) {
-                $value = "0";
+                $value = '0';
             } else {
                 $value = (string)$property->value;
             }
