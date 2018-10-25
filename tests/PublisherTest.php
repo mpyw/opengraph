@@ -4,8 +4,9 @@ namespace Mpyw\OpenGraph\Test;
 
 use Mpyw\OpenGraph\Publisher;
 use Mpyw\OpenGraph\Test\TestData\TestPublishObject;
+use PHPUnit\Framework\TestCase;
 
-class PublisherTest extends \PHPUnit_Framework_TestCase
+class PublisherTest extends TestCase
 {
     /**
      * @var Publisher
@@ -28,7 +29,7 @@ class PublisherTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("", $result);
     }
 
-    public function testGenerateHtmlValuesProvider()
+    public function generateHtmlValuesProvider()
     {
         return [
             [ true,                                         "1" ],
@@ -45,7 +46,7 @@ class PublisherTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dataProvider testGenerateHtmlValuesProvider
+     * @dataProvider generateHtmlValuesProvider
      */
     public function testGenerateHtmlValues($value, $expectedContent)
     {

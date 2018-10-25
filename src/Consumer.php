@@ -4,7 +4,6 @@ namespace Mpyw\OpenGraph;
 
 use Mpyw\OpenGraph\Objects\ObjectBase;
 use Mpyw\OpenGraph\Objects\Website;
-use GuzzleHttp\Adapter\AdapterInterface;
 use GuzzleHttp\Client;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -32,14 +31,11 @@ class Consumer
     public $debug = false;
 
     /**
-     * @param   AdapterInterface $adapter Guzzle adapter to use for making HTTP requests.
-     * @param   array            $config  Optional Guzzle config overrides.
+     * @param Client $client
      */
-    public function __construct(AdapterInterface $adapter = null, array $config = [])
+    public function __construct(?Client $client = null)
     {
-        $config = array_replace_recursive(['adapter' => $adapter], $config);
-
-        $this->client = new Client($config);
+        $this->client = $client ?? new Client();
     }
 
     /**

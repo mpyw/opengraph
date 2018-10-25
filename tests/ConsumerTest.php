@@ -3,8 +3,9 @@
 namespace Mpyw\OpenGraph\Test;
 
 use Mpyw\OpenGraph\Consumer;
+use PHPUnit\Framework\TestCase;
 
-class ConsumerTest extends \PHPUnit_Framework_TestCase
+class ConsumerTest extends TestCase
 {
     /**
      * Checks crawler to read basic properties.
