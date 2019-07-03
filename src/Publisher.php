@@ -2,6 +2,8 @@
 
 namespace Mpyw\OpenGraph;
 
+use DateTimeInterface;
+use Mpyw\OpenGraph\Exceptions\UnexpectedValueException;
 use Mpyw\OpenGraph\Objects\ObjectBase;
 
 /**
@@ -9,8 +11,8 @@ use Mpyw\OpenGraph\Objects\ObjectBase;
  */
 class Publisher
 {
-    const DOCTYPE_HTML5 = 1;
-    const DOCTYPE_XHTML = 2;
+    public const DOCTYPE_HTML5 = 1;
+    public const DOCTYPE_XHTML = 2;
 
     /**
      * Defines the style in which HTML tags should be written. Use one of Publisher::DOCTYPE_HTML5 or
@@ -19,10 +21,6 @@ class Publisher
      * @var int
      */
     public $doctype = self::DOCTYPE_HTML5;
-
-    public function __construct()
-    {
-    }
 
     public function generateHtml(ObjectBase $object)
     {
@@ -37,10 +35,10 @@ class Publisher
             if ($property->value === null) {
                 continue;
             }
-            if ($property->value instanceof \DateTime) {
+            if ($property->value instanceof DateTimeInterface) {
                 $value = $property->value->format('c');
             } elseif (is_object($property->value)) {
-                throw new \UnexpectedValueException(
+                throw new UnexpectedValueException(
                     sprintf(
                         "Cannot handle value of type '%0' for property '%1'.",
                         get_class($property->value),

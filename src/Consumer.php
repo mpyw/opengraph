@@ -3,7 +3,6 @@
 namespace Mpyw\OpenGraph;
 
 use DOMElement;
-use GuzzleHttp\Client;
 use Mpyw\OpenGraph\Objects\ObjectBase;
 use Mpyw\OpenGraph\Objects\Website;
 use Symfony\Component\DomCrawler\Crawler;
@@ -30,27 +29,13 @@ class Consumer
     public $debug = false;
 
     /**
-     * Fetches HTML content from the given URL and then crawls it for Open Graph data.
-     *
-     * @param  string     $url URL to be crawled.
-     * @return ObjectBase
-     */
-    public function loadUrl(string $url): ObjectBase
-    {
-        // Fetch HTTP content using Guzzle
-        $response = (new Client())->get($url);
-        return $this->loadHtml((string)$response->getBody(), $url);
-    }
-
-    /**
      * @param  string      $html        HTML string, usually whole content of crawled web resource.
      * @param  null|string $fallbackUrl URL to use when fallback mode is enabled.
      * @return ObjectBase
      */
-    public function loadHtml(string $html, ?string $fallbackUrl = null): ObjectBase
+    public function loadHtml(string $html, ?string $fallbackUrl = null)
     {
         $crawler = $this->newCrawler($html);
-
         $properties = $this->newProperties($crawler);
 
         $object = $this
@@ -80,7 +65,7 @@ class Consumer
      * @param  string  $content
      * @return Crawler
      */
-    protected function newCrawler(string $content): Crawler
+    protected function newCrawler(string $content)
     {
         $crawler = new Crawler();
         $crawler->addHTMLContent($content);
@@ -91,7 +76,7 @@ class Consumer
      * @param  DOMElement $tag
      * @return Property
      */
-    protected function newProperty(DOMElement $tag): Property
+    protected function newProperty(DOMElement $tag)
     {
         $name = trim($tag->getAttribute('name') ?: $tag->getAttribute('property'));
         $value = trim($tag->getAttribute('content'));
@@ -102,7 +87,7 @@ class Consumer
      * @param  Crawler    $crawler
      * @return ObjectBase
      */
-    protected function newObject(Crawler $crawler): ObjectBase
+    protected function newObject(Crawler $crawler)
     {
         switch ($crawler->evaluate('normalize-space(//meta[@property="og:type" or @name="og:type"]/@content)')[0] ?? null) {
             default:
@@ -114,9 +99,9 @@ class Consumer
      * @param  ObjectBase  $object
      * @param  Crawler     $crawler
      * @param  null|string $fallbackUrl
-     * @return static
+     * @return $this
      */
-    protected function fallback(ObjectBase $object, Crawler $crawler, ?string $fallbackUrl = null): self
+    protected function fallback(ObjectBase $object, Crawler $crawler, ?string $fallbackUrl = null)
     {
         return $this
             ->fallbackForUrl($object, $crawler, $fallbackUrl)
@@ -128,13 +113,13 @@ class Consumer
      * @param  ObjectBase  $object
      * @param  Crawler     $crawler
      * @param  null|string $fallbackUrl
-     * @return static
+     * @return $this
      */
-    protected function fallbackForUrl(ObjectBase $object, Crawler $crawler, ?string $fallbackUrl = null): self
+    protected function fallbackForUrl(ObjectBase $object, Crawler $crawler, ?string $fallbackUrl = null)
     {
         $object->url = $object->url
             ?: $crawler->evaluate('normalize-space(//link[@rel="canonical"]/@href)')[0]
-            ?? null
+                ?? null
             ?: $fallbackUrl
             ?: $object->url;
 
@@ -144,15 +129,15 @@ class Consumer
     /**
      * @param  ObjectBase $object
      * @param  Crawler    $crawler
-     * @return static
+     * @return $this
      */
-    protected function fallbackForTitle(ObjectBase $object, Crawler $crawler): self
+    protected function fallbackForTitle(ObjectBase $object, Crawler $crawler)
     {
         $object->title = $object->title
             ?: $crawler->evaluate('normalize-space(//title)')[0]
-            ?? $crawler->evaluate('normalize-space(//h1)')[0]
-            ?? $crawler->evaluate('normalize-space(//h2)')[0]
-            ?? null
+                ?? $crawler->evaluate('normalize-space(//h1)')[0]
+                ?? $crawler->evaluate('normalize-space(//h2)')[0]
+                ?? null
             ?: $object->title;
 
         return $this;
@@ -161,14 +146,14 @@ class Consumer
     /**
      * @param  ObjectBase $object
      * @param  Crawler    $crawler
-     * @return static
+     * @return $this
      */
-    protected function fallbackForDescription(ObjectBase $object, Crawler $crawler): self
+    protected function fallbackForDescription(ObjectBase $object, Crawler $crawler)
     {
         $object->description = $object->description
             ?: $crawler->evaluate('normalize-space(//meta[@property="description" or @name="description"]/@content)')[0]
-            ?? $crawler->evaluate('normalize-space(//p)')[0]
-            ?? null
+                ?? $crawler->evaluate('normalize-space(//p)')[0]
+                ?? null
             ?: $object->description;
 
         return $this;
