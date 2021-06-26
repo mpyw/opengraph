@@ -1,6 +1,6 @@
 # mpyw/opengraph
 
-[![Build Status](https://travis-ci.com/mpyw/opengraph.png)](https://travis-ci.com/mpyw/opengraph)
+[![Build Status](https://github.com/mpyw/opengraph/actions/workflows/ci.yml/badge.svg)](https://github.com/mpyw/opengraph/actions)
 [![](https://scrutinizer-ci.com/g/mpyw/opengraph/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/mpyw/opengraph/?branch=master)
 
 A simple library to read Open Graph data from the web and generate HTML code to publish your own Open Graph objects. A fallback mode enables you to read data from websites that do not implement the Open Graph protocol.
@@ -11,7 +11,7 @@ See [ogp.me](http://ogp.me) for information on the Open Graph protocol.
 
 ## Requirements
 
-* PHP 7.2 and up
+* PHP `7.2 and up`
 * [symfony/css-selector](https://github.com/symfony/CssSelector)
 * [symfony/dom-crawler](https://github.com/symfony/DomCrawler)
 
