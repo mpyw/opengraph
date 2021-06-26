@@ -11,7 +11,7 @@ See [ogp.me](http://ogp.me) for information on the Open Graph protocol.
 
 ## Requirements
 
-* PHP `7.2 and up`
+* PHP `^7.2 || ^8.0`
 * [symfony/css-selector](https://github.com/symfony/CssSelector)
 * [symfony/dom-crawler](https://github.com/symfony/DomCrawler)
 
