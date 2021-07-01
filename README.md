@@ -1,7 +1,6 @@
 # mpyw/opengraph
 
-[![Build Status](https://github.com/mpyw/opengraph/actions/workflows/ci.yml/badge.svg)](https://github.com/mpyw/opengraph/actions)
-[![](https://scrutinizer-ci.com/g/mpyw/opengraph/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/mpyw/opengraph/?branch=master)
+[![Build Status](https://github.com/mpyw/opengraph/actions/workflows/ci.yml/badge.svg)](https://github.com/mpyw/opengraph/actions) [![Coverage Status](https://coveralls.io/repos/github/mpyw/opengraph/badge.svg?branch=master)](https://coveralls.io/github/mpyw/opengraph?branch=master) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mpyw/opengraph/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mpyw/opengraph/?branch=master)
 
 A simple library to read Open Graph data from the web and generate HTML code to publish your own Open Graph objects. A fallback mode enables you to read data from websites that do not implement the Open Graph protocol.
 
@@ -11,31 +10,14 @@ See [ogp.me](http://ogp.me) for information on the Open Graph protocol.
 
 ## Requirements
 
-* PHP `^7.2 || ^8.0`
-* [symfony/css-selector](https://github.com/symfony/CssSelector)
-* [symfony/dom-crawler](https://github.com/symfony/DomCrawler)
+- PHP `^7.2 || ^8.0`
+- [symfony/css-selector](https://github.com/symfony/CssSelector): `^4.1`
+- [symfony/dom-crawler](https://github.com/symfony/DomCrawler): `^4.1`
 
-## Installation
+## Installing
 
-The most flexible installation method is using Composer: Simply create a composer.json file in the root of your project:
-```json
-{
-    "require": {
-        "mpyw/opengraph": "^0.1"
-    }
-}
 ```
-
-Install composer and run install command:
-```bash
-curl -s http://getcomposer.org/installer | php
-php composer.phar install
-``` 
-
-Once installed, include vendor/autoload.php in your script.
-
-```php
-require 'vendor/autoload.php';
+composer require mpyw/opengraph
 ```
 
 ## Usage

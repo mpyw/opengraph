@@ -1,17 +1,32 @@
+checks:
+  php:
+    code_rating: true
+
+filter:
+  excluded_paths:
+    - tests/*
+    - vendor/*
+
 build:
+
+  nodes:
+    analysis:
+      tests:
+        override:
+          - php-scrutinizer-run
+
   environment:
-    php:
-      version: 7.4
+    php: '7.4'
+
+  dependencies:
+    before:
+      - composer install
+      - mkdir -p build/logs
+
   tests:
     override:
       -
-        command: 'vendor/bin/phpunit --coverage-clover coverage-report'
+        command: 'vendor/bin/phpunit --coverage-clover build/logs/clover.xml'
         coverage:
-          file: 'coverage-report'
+          file: 'build/logs/clover.xml'
           format: 'clover'
-
-tools:
-  php_code_sniffer:
-    enabled: true
-    config:
-      standard: PSR2

@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         php: [7.2, 7.3, 7.4, 8.0]
+        composer_flags: [--prefer-stable --prefer-lowest, --prefer-stable]
 
     steps:
       - uses: actions/checkout@v2
@@ -19,5 +20,30 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: xdebug
 
-      - run: composer update
-      - run: vendor/bin/phpunit
+      - run: composer require phpunit/phpunit --dev --prefer-stable
+      - run: composer update ${{ matrix.composer_flags }}
+      - run: mkdir -p build/logs
+      - run: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+      - name: Upload Coverage
+        uses: nick-invision/retry@v2
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_PARALLEL: 'true'
+          COVERALLS_FLAG_NAME: 'php:${{ matrix.php }}'
+        with:
+          timeout_minutes: 1
+          max_attempts: 3
+          command: |
+            composer global require php-coveralls/php-coveralls
+            php-coveralls --coverage_clover=build/logs/clover.xml -v
+
+  coverage-aggregation:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Aggregate Coverage
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
